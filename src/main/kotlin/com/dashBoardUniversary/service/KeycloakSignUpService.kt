@@ -3,6 +3,7 @@ package com.dashBoardUniversary.service
 import com.dashBoardUniversary.model.UserLogin
 import com.dashBoardUniversary.commons.extensions.TestLogging
 import com.dashBoardUniversary.commons.extensions.logger
+import com.dashBoardUniversary.commons.handler.KeycloakException
 import com.dashBoardUniversary.config.KeycloakConfiguration
 import com.dashBoardUniversary.port.KeycloakSignUpServicePort
 import com.google.gson.JsonParser
@@ -23,7 +24,7 @@ import java.time.Instant
 @Named("keycloak")
 class KeycloakSignUpService(
     private val keycloakConfiguration: KeycloakConfiguration,
-//    private val keycloakCacheService: KeycloakCacheService,
+    private val keycloakCacheService: KeycloakCacheService,
 ) : KeycloakSignUpServicePort, TestLogging {
 
     val client = OkHttpClient()
@@ -31,25 +32,21 @@ class KeycloakSignUpService(
     override fun signUp(user: UserLogin): UserLogin {
         logger().info("signUp - Inicio do serviÃ§o keycloak")
 
-//        val tokenAdminCliCache = keycloakCacheService.readTokenAdminCliCache()
+        val tokenAdminCliCache = keycloakCacheService.readTokenAdminCliCache()
 
         logger().info("signUp - Verificando o Token do Admin Cli (CACHE)")
-//        val accessToken = if (tokenAdminCliCache != null && this.verifyExpTokenAdminCli(tokenAdminCliCache)) {
+        val accessToken = if (tokenAdminCliCache != null && this.verifyExpTokenAdminCli(tokenAdminCliCache)) {
             logger().info("signUp - Token do admin cli (cache) Ã© vÃ¡lido")
-//            tokenAdminCliCache
-//        } else {
+            tokenAdminCliCache
+        } else {
             logger().info("signUp - Token do admin cli (cache) invÃ¡lido, gerando um novo...")
-//            keycloakCacheService.deleteTokenAdminCliCache()
-//
+            keycloakCacheService.deleteTokenAdminCliCache()
+
             val accessTokenAdminCli = this.getAccessTokenAdminCli()
-//            keycloakCacheService.saveTokenAdminCliCache(accessTokenAdminCli)
-//
+            keycloakCacheService.saveTokenAdminCliCache(accessTokenAdminCli)
+
             accessTokenAdminCli
-
-        println(accessTokenAdminCli)
-//        }
-
-        val client = OkHttpClient()
+        }
 
         val mediaType = MediaType.parse("application/json")
         val body = RequestBody.create(mediaType, "{\"firstName\":\"${user.firstName}\"," +
@@ -62,24 +59,17 @@ class KeycloakSignUpService(
             .url("http://localhost:8080/admin/realms/universary/users")
             .post(body)
             .addHeader("Content-Type", "application/json")
-            .addHeader("Authorization", "Bearer $accessTokenAdminCli")
+            .addHeader("Authorization", "Bearer $accessToken")
             .build()
 
         val response = client.newCall(request).execute()
         if (!response.isSuccessful) {
-            throw java.lang.RuntimeException("KeycloakSingUpService - NÃ£o foi possÃ­vel cadastrar o usuÃ¡rio")
-
+            throw KeycloakException("KeycloakSingUpService - NÃ£o foi possÃ­vel cadastrar o usuÃ¡rio")
         }
 
         logger().info("signUp - usuÃ¡rio registrado no keycloak!")
         return UserLogin(user.username, user.firstName, user.lastName, user.email, user.password)
     }
-
-
-
-
-
-
 
     private fun getAccessTokenAdminCli(): String {
         logger().info("getAccessTokenAdminCli - capturando o access_token do admin-cli")
@@ -103,11 +93,11 @@ class KeycloakSignUpService(
             return responseBodyToJson.asJsonObject["access_token"].asString
         } else {
             logger().error("getAccessTokenAdminCli - access_token nÃ£o capturado!")
-            throw java.lang.RuntimeException("KeycloakSingUpService - Token not received")
+            throw KeycloakException("KeycloakSingUpService - Token not received")
         }
     }
 
-    private fun verifyExpTokenAdminCli(token: String): Boolean {
+        fun verifyExpTokenAdminCli(token: String): Boolean {
         logger().info("verifyExpTokenAdminCli - verificando expiraÃ§Ã£o do token do admin-cli")
 
         try {

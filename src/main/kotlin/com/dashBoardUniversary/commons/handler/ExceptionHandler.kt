@@ -4,6 +4,7 @@ import com.dashBoardUniversary.commons.handler.AwsConnectionException
 import com.dashBoardUniversary.commons.handler.MongoException
 import com.dashBoardUniversary.commons.extensions.TestLogging
 import com.dashBoardUniversary.commons.extensions.logger
+import com.dashBoardUniversary.commons.handler.KeycloakException
 import io.micronaut.aop.Around
 import io.micronaut.aop.InterceptorBean
 import io.micronaut.aop.MethodInterceptor
@@ -37,6 +38,9 @@ class HandlerExceptions : MethodInterceptor<Any, Any>, TestLogging {
                     return logger().error(e.message)
                 }
                 is AwsConnectionException -> {
+                    return logger().error(e.message)
+                }
+                is KeycloakException -> {
                     return logger().error(e.message)
                 }
                 else -> {
