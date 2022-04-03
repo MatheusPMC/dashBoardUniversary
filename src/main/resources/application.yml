@@ -1,14 +1,23 @@
 micronaut:
   application:
     name: dashBoardUniversary
+  server:
+    port: 8081
   security:
-    authentication: cookie
-    oauth2:
-      clients:
-        default:
-          client-id: ${OAUTH_CLIENT_ID}
-          client-secret: ${OAUTH_CLIENT_SECRET}
-netty:
-  default:
-    allocator:
-      max-order: 3
+    authentication: bearer
+    token:
+      jwt:
+        enabled: true
+        signatures:
+          jwks:
+            keycloak:
+              url: http://localhost:8080/realms/universary/protocol/openid-connect/certs
+
+keycloak:
+  authUrl: http://localhost:8080/realms/universary/protocol/openid-connect/auth?client_id=myclient&redirect_uri=https%3A%2F%2Fwww.keycloak.org%2Fapp%2F%23url%3Dhttp%3A%2F%2localhost%3A8080%2Fauth%26realm%3Dmyrealm%26client%3Dmyrealm%26client%3Dmyclient&state=60782d3c-f93d-468f-8eb2-9cdef24afba0&response_mode=gragment&response_type=code&scope=openid&nonce=a8152238-a828-487a-8c2c-c47201ccb2ad5
+  usersRegisterUrl: http://localhost:8080/admin/realms/universary/users
+  accessTokenAdminCliUrl: http://localhost:8080/realms/universary/protocol/openid-connect/token
+  grantType: client_credentials
+  clientId: micronaut
+  clientSecret: 7Kbt5gVrf6MW8GcqLmP5bSNLRL8KPjxQ
+  certsRSAUrl: http://localhost:8080/realms/universary/protocol/openid-connect/certs
