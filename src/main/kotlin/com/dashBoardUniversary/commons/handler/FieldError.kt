@@ -1,4 +1,4 @@
-package com.exampleInte.commons.handler
+package com.dashBoardUniversary.commons.handler
 
 data class FieldError(
     val field: String,

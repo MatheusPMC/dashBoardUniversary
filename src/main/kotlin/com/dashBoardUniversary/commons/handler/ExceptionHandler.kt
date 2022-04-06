@@ -1,10 +1,7 @@
-package com.exampleInte.commons.handler
+package com.dashBoardUniversary.commons.handler
 
-import com.dashBoardUniversary.commons.handler.AwsConnectionException
-import com.dashBoardUniversary.commons.handler.MongoException
 import com.dashBoardUniversary.commons.extensions.TestLogging
 import com.dashBoardUniversary.commons.extensions.logger
-import com.dashBoardUniversary.commons.handler.KeycloakException
 import io.micronaut.aop.Around
 import io.micronaut.aop.InterceptorBean
 import io.micronaut.aop.MethodInterceptor
